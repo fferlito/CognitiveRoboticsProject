@@ -1,6 +1,10 @@
 # CognitiveRoboticsProject
 Project for group number 7
 
+based on: 
+
+https://nestor.rug.nl/bbcswebdav/pid-10289157-dt-content-rid-26510189_2/courses/WMAI003-05.2020-2021.1A/example_final_project.pdf
+
 
 In this project we consider training a classifier X on feature histograms computed using the Global Orthographic Object Descriptor (GOOD) object descriptors and another descriptor X. 
 
