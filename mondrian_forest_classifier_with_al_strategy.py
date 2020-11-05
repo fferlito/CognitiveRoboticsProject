@@ -5,6 +5,7 @@ from sklearn.naive_bayes import BernoulliNB
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.neural_network import MLPClassifier
 from sklearn.linear_model import PassiveAggressiveClassifier
+from skmultiflow.data import DataStream
 class MondrianForestClassifierWithALStrategy(BernoulliNB):
     @staticmethod
     def calculate_confidence(probabilities):
@@ -80,3 +81,27 @@ class MondrianForestClassifierWithALStrategy(BernoulliNB):
                 amount_of_training_samples_selected += 1
 
         return amount_of_training_samples_selected
+
+    def random_sample_from_one_instance(self, Y, instance):
+        instance_idxs = np.where(Y == instance)
+        random_sample_of_instance = np.random.choice(instance_idxs[0], size=25)
+        return random_sample_of_instance
+
+    def our_al_strategy(self, X, Y, classes = np.array(range(51)), inital_dataset_size=300, threshold = 0.5, n_of_objects_confidence = 51):
+        classes = np.array(range(51))
+        train_X, train_Y = self.shuffling(X, Y)
+        # fit to shuffled inital dataset
+        self.partial_fit(train_X[:inital_dataset_size], train_Y[:inital_dataset_size], classes)
+        for data, label in zip(X, Y):
+            # Calculate confidence in the prediction for the data sample
+            if self.calculate_confidence(self.predict_proba([data])[0]) < threshold:
+                # train on exact instance that is was unsure about
+                self.partial_fit([data], [label])
+                # train again on 50 instances (25 of the unsure class, 25 random)
+                object_idxs = self.random_sample_from_one_instance(Y, label)
+                random_idxs = np.random.choice(Y, size=25)
+                # fit again for objects of the unsure instance with always a random one in between
+                for i in range(0, 25):
+                    self.partial_fit([X[object_idxs][i]], [Y[object_idxs][i]])
+                    self.partial_fit([X[random_idxs][i]], [Y[random_idxs][i]])
+        return 1
