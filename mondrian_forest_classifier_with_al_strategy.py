@@ -6,7 +6,9 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.neural_network import MLPClassifier
 from sklearn.linear_model import PassiveAggressiveClassifier
 from skmultiflow.data import DataStream
-class MondrianForestClassifierWithALStrategy(BernoulliNB):
+from sklearn.linear_model import Perceptron
+from skmultiflow.meta.multi_output_learner import MultiOutputLearner
+class MondrianForestClassifierWithALStrategy(AdaptiveRandomForestClassifier):
     @staticmethod
     def calculate_confidence(probabilities):
         """
@@ -49,7 +51,7 @@ class MondrianForestClassifierWithALStrategy(BernoulliNB):
         selected_idxs = [idx for probs, idx in zip(probabilities, range(inital_dataset_size, X.shape[0])) if
                             self.calculate_confidence(probs) < threshold]
         # Fit again on the samples the mf is unsure about
-        self.partial_fit(X[selected_idxs], Y[selected_idxs])
+       # self.partial_fit(X[selected_idxs], Y[selected_idxs])
 
         return len(selected_idxs)
 
@@ -105,3 +107,44 @@ class MondrianForestClassifierWithALStrategy(BernoulliNB):
                     self.partial_fit([X[object_idxs][i]], [Y[object_idxs][i]])
                     self.partial_fit([X[random_idxs][i]], [Y[random_idxs][i]])
         return 1
+
+    def our_second_al_strategy(self, X, Y, classes = np.array(range(51)), inital_dataset_size = 300, threshold=0.5):
+        train_X, train_Y = self.shuffling(X, Y)
+        # fit to shuffled inital dataset
+        self.partial_fit(train_X[:inital_dataset_size], train_Y[:inital_dataset_size], classes)
+        correct_cnt = 0
+        n_cor_continue = 5
+        cnt = 0
+        print("length: " + str(len(Y)))
+        i = 0
+        skip_to_next = 0
+        classes_done = 0
+        while i < len(Y):
+            print(i)
+            pred = self.predict([X[i]])
+            if pred == Y[i]:
+                correct_cnt += 1
+                print("correct YAY")
+            if correct_cnt == n_cor_continue:
+                classes_done += 1
+                if classes_done < 51:
+                    next_instance_idx = np.where(Y == Y[i]+1)
+                    dummy = np.sort(next_instance_idx)
+                    x = dummy[0][0]
+                    correct_cnt = 0
+                    skip_to_next = 1
+            if skip_to_next == 1:
+                i = x
+                skip_to_next = 0
+            else:
+                i += 1
+            if classes_done == 51:
+                print("Finished!")
+                break
+            print("i after: " + str(i))
+            cnt += 1
+            print("loop executed: " + str(cnt))
+            self.partial_fit([X[i]], [Y[i]])
+            self.partial_fit([train_X[i]], [train_Y[i]])
+        return 1
+
