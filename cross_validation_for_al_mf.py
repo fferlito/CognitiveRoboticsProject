@@ -58,11 +58,9 @@ def train_and_test(args):
             samples_used.append(mf.fit_using_al_strategy_thres(data[training_idxs], labels[training_idxs],
                                                                         np.array(range(51)), 300, args.threshold))
         elif args.strategy == 2:
-            samples_used.append(mf.our_al_strategy(data[training_idxs], labels[training_idxs],
-                                                                        np.array(range(51)), 300, args.threshold))
+            samples_used.append(mf.our_al_strategy(data[training_idxs], labels[training_idxs]))
         elif args.strategy == 3:
-            samples_used.append(mf.our_second_al_strategy(data[training_idxs], labels[training_idxs],
-                                                                        np.array(range(51)), 300, args.threshold)
+            samples_used.append(mf.our_second_al_strategy(data[training_idxs], labels[training_idxs]))
         else:
             print('ERROR: pleaase specify a valid strategy (i.e. --strategy 0)')
             print('Quitting the code..')
