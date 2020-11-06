@@ -1,6 +1,5 @@
 import numpy as np
 from skgarden import MondrianForestClassifier
-from skmultiflow.meta import AdaptiveRandomForestClassifier
 from sklearn.naive_bayes import BernoulliNB
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.neural_network import MLPClassifier
@@ -8,7 +7,8 @@ from sklearn.linear_model import PassiveAggressiveClassifier
 from skmultiflow.data import DataStream
 from sklearn.linear_model import Perceptron
 from skmultiflow.meta.multi_output_learner import MultiOutputLearner
-class MondrianForestClassifierWithALStrategy(AdaptiveRandomForestClassifier):
+
+class MondrianForestClassifierWithALStrategy(MondrianForestClassifier):
     @staticmethod
     def calculate_confidence(probabilities):
         """

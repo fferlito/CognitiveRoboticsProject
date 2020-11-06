@@ -7,6 +7,9 @@ from load_dataset import load_vfh_data, load_good5_data, load_good15_data
 from mondrian_forest_classifier_with_al_strategy import MondrianForestClassifierWithALStrategy
 import argparse
 
+from skmultiflow.meta import AdaptiveRandomForestClassifier
+from sklearn.naive_bayes import BernoulliNB
+
 
 
 def train_and_test(args):
@@ -37,15 +40,15 @@ def train_and_test(args):
     print('-------------------')
     start_time = time.time()
     for training_idxs, validation_idxs in cv_generator:
-        mf = MondrianForestClassifierWithALStrategy(n_estimators=22)
+        mf = MondrianForestClassifierWithALStrategy()
        
-        if args.classifier == 0:
+        if args.strategy == 0:
             samples_used.append(mf.fit_using_al_strategy_thres_intermediate_update(data[training_idxs], labels[training_idxs],
                                                                         np.array(range(51)), 300, args.threshold))
-        elif args.classifier == 1:
-            samples_used.append(mf.fit_using_al_strategy_thres_intermediate_update(data[training_idxs], labels[training_idxs],
+        elif args.strategy == 1:
+            samples_used.append(mf.fit_using_al_strategy_thres(data[training_idxs], labels[training_idxs],
                                                                         np.array(range(51)), 300, args.threshold))
-        elif args.classifier == 1:
+        elif args.strategy == 1:
             samples_used.append(mf.fit_using_al_strategy_thres_intermediate_update(data[training_idxs], labels[training_idxs],
                                                                         np.array(range(51)), 300, args.threshold))
         else:
@@ -79,8 +82,10 @@ def main():
               ''')
     # Set the strategy parser
     parser.add_argument('--strategy', type=int, required=True, help= '''Active learning strategy to use: 
-   0 -> threhsold intermediate update
-   1 -> new strategy
+   0 -> fit_using_al_strategy_thres_intermediate_update
+   1 -> fit_using_al_strategy_thres
+   2 -> our_al_strategy
+   3 -> our_second_al_strategy
 ''')
     # Set the threshold parser
     parser.add_argument('--threshold', type=float, help='''Threhsold in the range 0-1 to use for the active learning strategy''')
