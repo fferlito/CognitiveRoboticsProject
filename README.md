@@ -24,14 +24,14 @@ You need to include the following flags:
                            1 -> GOOD 5
                            2 -> GOOD 15
                                       
-  --strategy  Active learning strategy to use: 
+--strategy  Active learning strategy to use: 
                            0 -> threhsold intermediate update
                            1 -> new strategy
-  --threshold Threhsold in the range 0-1 to use for the active learning strategy
-  --classifier Classifier to use: 
+                           
+--threshold Threhsold in the range 0-1 to use for the active learning strategy
+
+--classifier Classifier to use: 
                            0 -> Mondrian forest
                            1 -> BernoulliNB??
                            2 -> Generic classifier??
-
-}
 ```
