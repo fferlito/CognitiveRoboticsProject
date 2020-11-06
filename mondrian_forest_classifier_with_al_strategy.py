@@ -7,8 +7,9 @@ from sklearn.linear_model import PassiveAggressiveClassifier
 from skmultiflow.data import DataStream
 from sklearn.linear_model import Perceptron
 from skmultiflow.meta.multi_output_learner import MultiOutputLearner
+from skmultiflow.bayes import NaiveBayes
 
-class MondrianForestClassifierWithALStrategy(MondrianForestClassifier):
+class ClassifierWithALStrategy():
     @staticmethod
     def calculate_confidence(probabilities):
         """
@@ -147,4 +148,16 @@ class MondrianForestClassifierWithALStrategy(MondrianForestClassifier):
             self.partial_fit([X[i]], [Y[i]])
             self.partial_fit([train_X[i]], [train_Y[i]])
         return 1
+    
+class MondrianForestClassifierWithALStrategy(ClassifierWithALStrategy, MondrianForestClassifier):
+    pass
+    
+class BernoulliNBClassifierWithALStrategy(ClassifierWithALStrategy, BernoulliNB):
+    pass
+    
+class MLPClassifierClassifierWithALStrategy(ClassifierWithALStrategy, MLPClassifier):
+    pass
+    
+class NaiveBayesClassifierWithALStrategy(ClassifierWithALStrategy, NaiveBayes):
+    pass
 

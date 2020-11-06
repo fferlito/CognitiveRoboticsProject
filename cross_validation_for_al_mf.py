@@ -4,7 +4,7 @@ import warnings
 import time
 import numpy as np
 from load_dataset import load_vfh_data, load_good5_data, load_good15_data
-from mondrian_forest_classifier_with_al_strategy import MondrianForestClassifierWithALStrategy
+from mondrian_forest_classifier_with_al_strategy import MondrianForestClassifierWithALStrategy, NaiveBayesClassifierWithALStrategy
 import argparse
 
 from skmultiflow.meta import AdaptiveRandomForestClassifier
@@ -40,19 +40,31 @@ def train_and_test(args):
     print('-------------------')
     start_time = time.time()
     for training_idxs, validation_idxs in cv_generator:
-        mf = MondrianForestClassifierWithALStrategy()
-       
+        print('HIT ME BABY ONE MORE TIME')
+        if args.classifier == 0:
+            mf = MondrianForestClassifierWithALStrategy()
+        elif args.classifier == 1:
+            mf = BernoulliNBClassifierWithALStrategy()
+        elif args.classifier == 2:
+            mf = NaiveBayesClassifierWithALStrategy()
+        else:
+            print('ERROR: pleaase specify a valid classifier (i.e. --classifier 0)')
+            print('Quitting the code..')
+            
         if args.strategy == 0:
             samples_used.append(mf.fit_using_al_strategy_thres_intermediate_update(data[training_idxs], labels[training_idxs],
                                                                         np.array(range(51)), 300, args.threshold))
         elif args.strategy == 1:
             samples_used.append(mf.fit_using_al_strategy_thres(data[training_idxs], labels[training_idxs],
                                                                         np.array(range(51)), 300, args.threshold))
-        elif args.strategy == 1:
-            samples_used.append(mf.fit_using_al_strategy_thres_intermediate_update(data[training_idxs], labels[training_idxs],
+        elif args.strategy == 2:
+            samples_used.append(mf.our_al_strategy(data[training_idxs], labels[training_idxs],
                                                                         np.array(range(51)), 300, args.threshold))
+        elif args.strategy == 3:
+            samples_used.append(mf.our_second_al_strategy(data[training_idxs], labels[training_idxs],
+                                                                        np.array(range(51)), 300, args.threshold)
         else:
-            print('ERROR: pleaase specify a valid classifier (i.e. --classifier 0)')
+            print('ERROR: pleaase specify a valid strategy (i.e. --strategy 0)')
             print('Quitting the code..')
                 
         scores.append(mf.score(np.array(data[validation_idxs, :]), np.array(labels[validation_idxs])))
@@ -92,8 +104,8 @@ def main():
     # Set the strategy parser
     parser.add_argument('--classifier', type=int, required=True, help= '''Classifier to use: 
    0 -> Mondrian forest
-   1 -> BernoulliNB??
-   2 -> Generic classifier??
+   1 -> BernoulliNB
+   2 -> MLPClassifierClassifierWithALStrategy
 ''')
     # parse inputs
     args = parser.parse_args()
