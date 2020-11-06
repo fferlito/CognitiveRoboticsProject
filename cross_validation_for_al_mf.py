@@ -1,10 +1,9 @@
-
 import sys
 import warnings
 import time
 import numpy as np
 from load_dataset import load_vfh_data, load_good5_data, load_good15_data
-from mondrian_forest_classifier_with_al_strategy import MondrianForestClassifierWithALStrategy, NaiveBayesClassifierWithALStrategy
+from mondrian_forest_classifier_with_al_strategy import *
 import argparse
 
 from skmultiflow.meta import AdaptiveRandomForestClassifier
@@ -42,7 +41,7 @@ def train_and_test(args):
     for training_idxs, validation_idxs in cv_generator:
         print('HIT ME BABY ONE MORE TIME')
         if args.classifier == 0:
-            mf = MondrianForestClassifierWithALStrategy()
+            mf = KNNClassifierWithALStrategy(max_window_size = 1000,n_neighbors = args.k)
         elif args.classifier == 1:
             mf = BernoulliNBClassifierWithALStrategy()
         elif args.classifier == 2:
@@ -101,17 +100,25 @@ def main():
     parser.add_argument('--threshold', type=float, help='''Threhsold in the range 0-1 to use for the active learning strategy''')
     # Set the strategy parser
     parser.add_argument('--classifier', type=int, required=True, help= '''Classifier to use: 
-   0 -> Mondrian forest
+   0 -> KNNclassifier
    1 -> BernoulliNB
    2 -> MLPClassifierClassifierWithALStrategy
 ''')
+    parser.add_argument('--k', type=int, help= '''Number of neighbors for KNN (i.e. 1) 
+              ''')
+
     # parse inputs
     args = parser.parse_args()
     
     
     
     if args.strategy == 0 and args.threshold==None:
-        print('ERROR: You need to specify a threhsold (i.e. --threshold 0.5) using this strategy')
+        print('ERROR: You need to specify a threshold (i.e. --threshold 0.5) using this strategy')
+        print('Quitting the code..')
+        quit()
+
+    if args.classifier == 0 and args.k==None:
+        print('ERROR: You need to specify a a variable')
         print('Quitting the code..')
         quit()
         
@@ -123,3 +130,4 @@ def main():
     
 if __name__ == "__main__":
     main()
+

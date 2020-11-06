@@ -8,6 +8,7 @@ from skmultiflow.data import DataStream
 from sklearn.linear_model import Perceptron
 from skmultiflow.meta.multi_output_learner import MultiOutputLearner
 from skmultiflow.bayes import NaiveBayes
+from skmultiflow.lazy import KNNClassifier
 
 class ClassifierWithALStrategy():
     @staticmethod
@@ -160,4 +161,5 @@ class MLPClassifierClassifierWithALStrategy(ClassifierWithALStrategy, MLPClassif
     
 class NaiveBayesClassifierWithALStrategy(ClassifierWithALStrategy, NaiveBayes):
     pass
-
+class KNNClassifierWithALStrategy(ClassifierWithALStrategy, KNNClassifier):
+    pass
