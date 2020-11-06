@@ -1,4 +1,4 @@
-# CognitiveRoboticsProject
+# Cognitive Robotics Project 2020
 Project for group number 7
 
 based on: 
