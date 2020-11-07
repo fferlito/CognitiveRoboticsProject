@@ -15,23 +15,28 @@ We use the Washington RGB-D dataset and compared the results we found to results
 To run the code: 
 1. first compile the c++ code in the CPP folder. Please refer to https://github.com/SeyedHamidreza/GOOD_descriptor
 2. download the dataset from https://rgbd-dataset.cs.washington.edu/dataset/rgbd-dataset_eval/ and https://rgbd-dataset.cs.washington.edu/dataset/rgbd-dataset_pcd_ascii/
-3. Build the dataset (build_additional_dataset.py) changing the path variables EVAL_DATASET_PATH, PC_DATASET_PATH, OUTPUT_DATASET_PATH
-4. Run either the cross_validation_for_al_mf.py shape_descriptor confidence_threshold(shape descriptor should be 0(VFH), 1(GOOD5) or 2(GOOD15)) or cross_validation_for_non_al_mf.py to generate the results. The required flags are:
+3. Install the python modules, specified in the requirements.txt file:
+``` 
+pip install -r requirements
+``` 
+
+4. Build the dataset (build_additional_dataset.py) changing the path variables EVAL_DATASET_PATH, PC_DATASET_PATH, OUTPUT_DATASET_PATH
+5. Run either the train.py to generate the run the cross-validation and get the results. The scripts requires the following flags:
 You need to include the following flags: 
 ``` 
---descriptor Dataset to use:   
-                           0 -> VFH 
-                           1 -> GOOD 5
-                           2 -> GOOD 15
+--descriptor 0 -> VFH 
+             2 -> GOOD 15
                                       
---strategy  Active learning strategy to use: 
-                           0 -> threhsold intermediate update
-                           1 -> new strategy
+--strategy   0 -> fit_using_al_strategy_thres_intermediate_update
+             1 -> our_al_strategy
+             2 -> our_second_al_strategy
                            
---threshold Threhsold in the range 0-1 to use for the active learning strategy
+--threshold (in the range 0-1 to use for the active learning strategy 0 and 1)
 
---classifier Classifier to use: 
-                           0 -> Mondrian forest
-                           1 -> BernoulliNB??
-                           2 -> Generic classifier??
+--classifier 0 -> Mondrian Forest Classifier
+             1 -> Gaussian Naive Bayes Classifier
+             2 -> KNN
+           
+ --k integer (k neighbors when using KNN as classifier)
+
 ```
