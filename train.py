@@ -12,11 +12,6 @@ if not sys.warnoptions:
 
 
 def train_and_test(args):
-    ini_amount_depth_data_thres = 300
-    ini_amount_depth_data_perc = 3000
-    num_trees_depth_data = 22
-
-
     print('-------------------')
     print('Loading dataset...')
     if args.descriptor == 0:
