@@ -1,0 +1,11 @@
+numpy
+Cython==0.29.14
+scikit-image
+scikit-learn==0.20.4
+scikit-multiflow
+imageio
+scikit-garden
+
+# run after: 
+# pip install git+https://github.com/scikit-garden/scikit-garden.git@master
+# pip install git+https://github.com/jundongl/scikit-feature.git@master

@@ -38,23 +38,23 @@ def train_and_test(args):
         elif args.classifier == 1:
             mf = GaussianNaiveBayes(var_smoothing = 0.001)
         elif args.classifier == 2:
-            mf = NaiveBayesClassifierWithALStrategy()
+            mf = knnClassifier()
         else:
             print('ERROR: pleaase specify a valid classifier (i.e. --classifier 0)')
             print('Quitting the code..')
             
         if args.strategy == 0:
-            samples_used.append(mf.fit_using_al_strategy_thres_intermediate_update(data[training_idxs], labels[training_idxs],
-                                                                        np.array(range(51)), 3000, args.threshold))
+            samples_used.append(mf.fit_using_al_strategy_thres_intermediate_update(data[training_idxs], labels[training_idxs],np.array(range(51)), 3000, args.threshold))
         elif args.strategy == 1:
-            samples_used.append(mf.our_al_strategy(data[training_idxs], labels[training_idxs]))
+            samples_used.append(mf.our_al_strategy(data[training_idxs], labels[training_idxs], 300, args.threshold))
         elif args.strategy == 2:
-            samples_used.append(mf.our_second_al_strategy(data[training_idxs], labels[training_idxs]))
+            samples_used.append(mf.our_second_al_strategy(data[training_idxs], labels[training_idxs], 300))
         else:
             print('ERROR: pleaase specify a valid strategy (i.e. --strategy 0)')
             print('Quitting the code..')
                 
         scores.append(mf.score(np.array(data[validation_idxs, :]), np.array(labels[validation_idxs])))
+        break
         del mf
 
     print("\n--------")

@@ -58,7 +58,7 @@ class ActiveLearning():
         random_sample_of_instance = np.random.choice(instance_idxs[0], size=n_train)
         return random_sample_of_instance
 
-    def our_al_strategy(self, X, Y, classes=np.array(range(51)), inital_dataset_size=300, threshold = 0.5, n_of_objects_confidence = 51):
+    def our_al_strategy(self, X, Y, classes=np.array(range(51)), inital_dataset_size=300, threshold = 0.5):
         classes = np.array(range(51)) if classes is None else classes  # default classes are 0-50
         shuffled_X, shuffled_Y = self.shuffling(X, Y)
         n_train = 1 # change number of training instances here
@@ -84,7 +84,7 @@ class ActiveLearning():
                   #  n_samples_used += 2
         return n_samples_used
 
-    def our_second_al_strategy(self, X, Y, classes = np.array(range(51)), inital_dataset_size = 300, threshold=0.5):
+    def our_second_al_strategy(self, X, Y, classes = np.array(range(51)), inital_dataset_size = 300):
         classes = np.array(range(51)) if classes is None else classes  # default classes are 0-50
         shuffeled_X, shuffeled_Y = self.shuffling(X, Y)
         # fit to shuffled inital dataset
