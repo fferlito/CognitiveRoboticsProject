@@ -1,15 +1,8 @@
 import numpy as np
 from skgarden import MondrianForestClassifier
-from sklearn.naive_bayes import BernoulliNB
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.neural_network import MLPClassifier
-from sklearn.linear_model import PassiveAggressiveClassifier
-from skmultiflow.data import DataStream
-from sklearn.linear_model import Perceptron
-from sklearn.mixture import GaussianMixture
-from skmultiflow.meta.multi_output_learner import MultiOutputLearner
-from skmultiflow.bayes import NaiveBayes
-from skmultiflow.neural_networks import PerceptronMask
+from sklearn.naive_bayes import GaussianNB
+from skmultiflow.lazy import KNNClassifier
+
 
 class ClassifierWithALStrategy():
     @staticmethod
@@ -136,7 +129,6 @@ class ClassifierWithALStrategy():
             else:
                 correct_cnt = 0
             if correct_cnt == n_consecutive_correct_next_class:
-                n_consecutive_correct_next_class -= 1
                 classes_done += 1
                 if classes_done < 51:
                     next_instance_idx = np.where(Y == Y[i]+1)
@@ -163,12 +155,10 @@ class ClassifierWithALStrategy():
 class MondrianForestClassifierWithALStrategy(ClassifierWithALStrategy, MondrianForestClassifier):
     pass
     
-class BernoulliNBClassifierWithALStrategy(ClassifierWithALStrategy, PerceptronMask):
+class GaussianNaiveBayes(ClassifierWithALStrategy, MondrianForestClassifier):
     pass
     
-class MLPClassifierClassifierWithALStrategy(ClassifierWithALStrategy, MLPClassifier):
+class knnClassifier(ClassifierWithALStrategy, MondrianForestClassifier):
     pass
     
-class NaiveBayesClassifierWithALStrategy(ClassifierWithALStrategy, NaiveBayes):
-    pass
 

@@ -2,12 +2,9 @@ import sys
 import warnings
 import time
 import numpy as np
-from load_dataset import load_vfh_data, load_good5_data, load_good15_data
+from load_dataset import load_vfh_data, load_good15_data
 from mondrian_forest_classifier_with_al_strategy import *
 import argparse
-
-from skmultiflow.meta import AdaptiveRandomForestClassifier
-from sklearn.naive_bayes import BernoulliNB
 
 
 
@@ -22,8 +19,6 @@ def train_and_test(args):
     if args.descriptor == 0:
         data, labels, cv_generator = load_vfh_data()
     elif args.descriptor == 1:
-        data, labels, cv_generator = load_good5_data()
-    elif args.descriptor == 2:
         data, labels, cv_generator = load_good15_data()
     else:
         print("undefined shape descriptor")
@@ -44,7 +39,7 @@ def train_and_test(args):
         if args.classifier == 0:
             mf = MondrianForestClassifierWithALStrategy(n_estimators=22)
         elif args.classifier == 1:
-            mf = BernoulliNBClassifierWithALStrategy()
+            mf = GaussianNaiveBayes(var_smoothing = 0.001)
         elif args.classifier == 2:
             mf = NaiveBayesClassifierWithALStrategy()
         else:
@@ -55,20 +50,14 @@ def train_and_test(args):
             samples_used.append(mf.fit_using_al_strategy_thres_intermediate_update(data[training_idxs], labels[training_idxs],
                                                                         np.array(range(51)), 3000, args.threshold))
         elif args.strategy == 1:
-            samples_used.append(mf.fit_using_al_strategy_thres(data[training_idxs], labels[training_idxs],
-                                                                        np.array(range(51)), 300, args.threshold))
-        elif args.strategy == 2:
             samples_used.append(mf.our_al_strategy(data[training_idxs], labels[training_idxs]))
-        elif args.strategy == 3:
+        elif args.strategy == 2:
             samples_used.append(mf.our_second_al_strategy(data[training_idxs], labels[training_idxs]))
         else:
             print('ERROR: pleaase specify a valid strategy (i.e. --strategy 0)')
             print('Quitting the code..')
                 
         scores.append(mf.score(np.array(data[validation_idxs, :]), np.array(labels[validation_idxs])))
-        stopper += 1
-        if stopper == 1:
-            break
         del mf
 
     print("\n--------")
@@ -89,45 +78,47 @@ def main():
     # Set the dataset parser
     parser.add_argument('--descriptor', type=int, required=True, help= '''Dataset to use:   
    0 -> VFH 
-   1 -> GOOD 5
-   2 -> GOOD 15
-              ''')
+   1 -> GOOD 15''')
+    
     # Set the strategy parser
     parser.add_argument('--strategy', type=int, required=True, help= '''Active learning strategy to use: 
    0 -> fit_using_al_strategy_thres_intermediate_update
-   1 -> fit_using_al_strategy_thres
-   2 -> our_al_strategy
-   3 -> our_second_al_strategy
-''')
+   1 -> our_al_strategy
+   2 -> our_second_al_strategy''')
+    
     # Set the threshold parser
-    parser.add_argument('--threshold', type=float, help='''Threhsold in the range 0-1 to use for the active learning strategy''')
+    parser.add_argument('--threshold', type=float, help='''Threhsold in the range 0-1 to use for the active learning strategy (strategy: 0 and 1)''')
+    
     # Set the strategy parser
     parser.add_argument('--classifier', type=int, required=True, help= '''Classifier to use: 
-   0 -> KNNclassifier
-   1 -> BernoulliNB
-   2 -> MLPClassifierClassifierWithALStrategy
+   0 -> Mondrian Forest Classifier
+   1 -> Gaussian Naive Bayes Classifier
+   2 -> KNN
 ''')
-    parser.add_argument('--k', type=int, help= '''Number of neighbors for KNN (i.e. 1) 
-              ''')
+    parser.add_argument('--k', type=int, help= '''Number of neighbors for KNN (i.e. 1)''')
 
     # parse inputs
     args = parser.parse_args()
     
     
     
-    if args.strategy == 0 and args.threshold==None:
+    if (args.strategy == 0 or args.strategy == 1) and args.threshold==None:
         print('ERROR: You need to specify a threshold (i.e. --threshold 0.5) using this strategy')
         print('Quitting the code..')
         quit()
+        
+    if args.classifier == 2 and args.k==None:
+        print('ERROR: You need to specify a number of neighbor k for knn (i.e. --k 3)')
+        print('Quitting the code..')
+        quit()
+        
     print('\nCognitive robotics project (group 7)\n')
     # RUN MAIN PART
     train_and_test(args)
-''' 
-    if args.classifier == 0 and args.k==None:
-        print('ERROR: You need to specify a a variable')
-        print('Quitting the code..')
-        quit()
- '''
+    
+ 
+    
+ 
 
     
 
