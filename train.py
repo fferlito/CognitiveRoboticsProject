@@ -3,9 +3,12 @@ import warnings
 import time
 import numpy as np
 from load_dataset import load_vfh_data, load_good15_data
-from mondrian_forest_classifier_with_al_strategy import *
+from ActiveLearning import *
 import argparse
+import warnings
 
+if not sys.warnoptions:
+    warnings.simplefilter("ignore")
 
 
 def train_and_test(args):
@@ -30,14 +33,13 @@ def train_and_test(args):
     scores = []
     samples_used = []
 
-    print('Started training and testing...')
+    print('Started training using cross validation...')
     print('-------------------')
     start_time = time.time()
     stopper = 0
     for training_idxs, validation_idxs in cv_generator:
-        print('HIT ME BABY ONE MORE TIME')
         if args.classifier == 0:
-            mf = MondrianForestClassifierWithALStrategy(n_estimators=22)
+            mf = MondrianForest(n_estimators=22)
         elif args.classifier == 1:
             mf = GaussianNaiveBayes(var_smoothing = 0.001)
         elif args.classifier == 2:
