@@ -38,6 +38,7 @@ def train_and_test(args):
     print('Started training and testing...')
     print('-------------------')
     start_time = time.time()
+    stopper = 0
     for training_idxs, validation_idxs in cv_generator:
         print('HIT ME BABY ONE MORE TIME')
         if args.classifier == 0:
@@ -52,7 +53,7 @@ def train_and_test(args):
             
         if args.strategy == 0:
             samples_used.append(mf.fit_using_al_strategy_thres_intermediate_update(data[training_idxs], labels[training_idxs],
-                                                                        np.array(range(51)), 300, args.threshold))
+                                                                        np.array(range(51)), 3000, args.threshold))
         elif args.strategy == 1:
             samples_used.append(mf.fit_using_al_strategy_thres(data[training_idxs], labels[training_idxs],
                                                                         np.array(range(51)), 300, args.threshold))
@@ -65,7 +66,9 @@ def train_and_test(args):
             print('Quitting the code..')
                 
         scores.append(mf.score(np.array(data[validation_idxs, :]), np.array(labels[validation_idxs])))
-        
+        stopper += 1
+        if stopper == 1:
+            break
         del mf
 
     print("\n--------")

@@ -6,9 +6,10 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.linear_model import PassiveAggressiveClassifier
 from skmultiflow.data import DataStream
 from sklearn.linear_model import Perceptron
+from sklearn.mixture import GaussianMixture
 from skmultiflow.meta.multi_output_learner import MultiOutputLearner
 from skmultiflow.bayes import NaiveBayes
-from skmultiflow.lazy import KNNClassifier
+from skmultiflow.neural_networks import PerceptronMask
 
 class ClassifierWithALStrategy():
     @staticmethod
@@ -53,7 +54,7 @@ class ClassifierWithALStrategy():
         selected_idxs = [idx for probs, idx in zip(probabilities, range(inital_dataset_size, X.shape[0])) if
                             self.calculate_confidence(probs) < threshold]
         # Fit again on the samples the mf is unsure about
-       # self.partial_fit(X[selected_idxs], Y[selected_idxs])
+        self.partial_fit(X[selected_idxs], Y[selected_idxs])
 
         return len(selected_idxs)
 
@@ -86,14 +87,16 @@ class ClassifierWithALStrategy():
 
         return amount_of_training_samples_selected
 
-    def random_sample_from_one_instance(self, Y, instance):
+    def random_sample_from_one_instance(self, Y, instance, n_train):
         instance_idxs = np.where(Y == instance)
-        random_sample_of_instance = np.random.choice(instance_idxs[0], size=25)
+        random_sample_of_instance = np.random.choice(instance_idxs[0], size=n_train)
         return random_sample_of_instance
 
-    def our_al_strategy(self, X, Y, classes = np.array(range(51)), inital_dataset_size=300, threshold = 0.5, n_of_objects_confidence = 51):
-        classes = np.array(range(51))
+    def our_al_strategy(self, X, Y, classes=np.array(range(51)), inital_dataset_size=300, threshold = 0.5, n_of_objects_confidence = 51):
+        classes = np.array(range(51)) if classes is None else classes  # default classes are 0-50
         train_X, train_Y = self.shuffling(X, Y)
+        n_train = 1 # change number of training instances here
+        n_samples_used = 0
         # fit to shuffled inital dataset
         self.partial_fit(train_X[:inital_dataset_size], train_Y[:inital_dataset_size], classes)
         for data, label in zip(X, Y):
@@ -101,33 +104,36 @@ class ClassifierWithALStrategy():
             if self.calculate_confidence(self.predict_proba([data])[0]) < threshold:
                 # train on exact instance that is was unsure about
                 self.partial_fit([data], [label])
-                # train again on 50 instances (25 of the unsure class, 25 random)
-                object_idxs = self.random_sample_from_one_instance(Y, label)
-                random_idxs = np.random.choice(Y, size=25)
+                n_samples_used += 1
+                # train again on 2 * n_train instances (half of the unsure class, half random)
+                object_idxs = self.random_sample_from_one_instance(Y, label, n_train)
+                random_idxs = np.random.choice(len(Y), size=n_train)
+                print(object_idxs, random_idxs)
                 # fit again for objects of the unsure instance with always a random one in between
-                for i in range(0, 25):
+                for i in range(0, n_train):
                     self.partial_fit([X[object_idxs][i]], [Y[object_idxs][i]])
                     self.partial_fit([X[random_idxs][i]], [Y[random_idxs][i]])
-        return 1
+                    n_samples_used += 2
+        return n_samples_used
 
     def our_second_al_strategy(self, X, Y, classes = np.array(range(51)), inital_dataset_size = 300, threshold=0.5):
-        train_X, train_Y = self.shuffling(X, Y)
+        classes = np.array(range(51)) if classes is None else classes  # default classes are 0-50
+        shuffeled_X, shuffeled_Y = self.shuffling(X, Y)
         # fit to shuffled inital dataset
-        self.partial_fit(train_X[:inital_dataset_size], train_Y[:inital_dataset_size], classes)
+        self.partial_fit(shuffeled_X[:inital_dataset_size], shuffeled_Y[:inital_dataset_size], classes)
         correct_cnt = 0
-        n_cor_continue = 5
-        cnt = 0
-        print("length: " + str(len(Y)))
+        n_consecutive_correct_next_class = 50
         i = 0
+        n_samples_used = 0
         skip_to_next = 0
         classes_done = 0
         while i < len(Y):
-            print(i)
             pred = self.predict([X[i]])
             if pred == Y[i]:
                 correct_cnt += 1
-                print("correct YAY")
-            if correct_cnt == n_cor_continue:
+            else:
+                correct_cnt = 0
+            if correct_cnt == n_consecutive_correct_next_class:
                 classes_done += 1
                 if classes_done < 51:
                     next_instance_idx = np.where(Y == Y[i]+1)
@@ -143,17 +149,18 @@ class ClassifierWithALStrategy():
             if classes_done == 51:
                 print("Finished!")
                 break
-            print("i after: " + str(i))
-            cnt += 1
-            print("loop executed: " + str(cnt))
-            self.partial_fit([X[i]], [Y[i]])
-            self.partial_fit([train_X[i]], [train_Y[i]])
-        return 1
+            if i > len(Y) - 1:
+                print("Ran out of data, try smaller number of consecutive correctly predicted classes")
+                break
+            self.partial_fit([X[i]], [Y[i]], classes)
+            self.partial_fit([shuffeled_X[i]], [shuffeled_Y[i]], classes)
+            n_samples_used += 2
+        return n_samples_used
     
 class MondrianForestClassifierWithALStrategy(ClassifierWithALStrategy, MondrianForestClassifier):
     pass
     
-class BernoulliNBClassifierWithALStrategy(ClassifierWithALStrategy, BernoulliNB):
+class BernoulliNBClassifierWithALStrategy(ClassifierWithALStrategy, PerceptronMask):
     pass
     
 class MLPClassifierClassifierWithALStrategy(ClassifierWithALStrategy, MLPClassifier):
@@ -161,5 +168,4 @@ class MLPClassifierClassifierWithALStrategy(ClassifierWithALStrategy, MLPClassif
     
 class NaiveBayesClassifierWithALStrategy(ClassifierWithALStrategy, NaiveBayes):
     pass
-class KNNClassifierWithALStrategy(ClassifierWithALStrategy, KNNClassifier):
-    pass
+
