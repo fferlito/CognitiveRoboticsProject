@@ -42,7 +42,7 @@ def train_and_test(args):
     for training_idxs, validation_idxs in cv_generator:
         print('HIT ME BABY ONE MORE TIME')
         if args.classifier == 0:
-            mf = KNNClassifierWithALStrategy(max_window_size = 1000,n_neighbors = args.k)
+            mf = MondrianForestClassifierWithALStrategy(n_estimators=22)
         elif args.classifier == 1:
             mf = BernoulliNBClassifierWithALStrategy()
         elif args.classifier == 2:
@@ -119,15 +119,16 @@ def main():
         print('ERROR: You need to specify a threshold (i.e. --threshold 0.5) using this strategy')
         print('Quitting the code..')
         quit()
-
+    print('\nCognitive robotics project (group 7)\n')
+    # RUN MAIN PART
+    train_and_test(args)
+''' 
     if args.classifier == 0 and args.k==None:
         print('ERROR: You need to specify a a variable')
         print('Quitting the code..')
         quit()
-        
-    print('\nCognitive robotics project (group 7)\n')
-    # RUN MAIN PART
-    train_and_test(args)
+ '''
+
     
 
     

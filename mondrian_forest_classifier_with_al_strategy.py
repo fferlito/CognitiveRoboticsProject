@@ -94,26 +94,28 @@ class ClassifierWithALStrategy():
 
     def our_al_strategy(self, X, Y, classes=np.array(range(51)), inital_dataset_size=300, threshold = 0.5, n_of_objects_confidence = 51):
         classes = np.array(range(51)) if classes is None else classes  # default classes are 0-50
-        train_X, train_Y = self.shuffling(X, Y)
+        shuffled_X, shuffled_Y = self.shuffling(X, Y)
         n_train = 1 # change number of training instances here
         n_samples_used = 0
         # fit to shuffled inital dataset
-        self.partial_fit(train_X[:inital_dataset_size], train_Y[:inital_dataset_size], classes)
+        self.partial_fit(shuffled_X[:inital_dataset_size], shuffled_Y[:inital_dataset_size], classes)
+        i = 0
         for data, label in zip(X, Y):
+            i += 1
             # Calculate confidence in the prediction for the data sample
             if self.calculate_confidence(self.predict_proba([data])[0]) < threshold:
                 # train on exact instance that is was unsure about
                 self.partial_fit([data], [label])
-                n_samples_used += 1
+                self.partial_fit([shuffled_X[i]], [shuffled_Y[i]])
+                n_samples_used += 2
                 # train again on 2 * n_train instances (half of the unsure class, half random)
-                object_idxs = self.random_sample_from_one_instance(Y, label, n_train)
-                random_idxs = np.random.choice(len(Y), size=n_train)
-                print(object_idxs, random_idxs)
+                #object_idxs = self.random_sample_from_one_instance(Y, label, n_train)
+               # random_idxs = np.random.choice(len(Y), size=n_train)
+               # print(object_idxs, random_idxs)
                 # fit again for objects of the unsure instance with always a random one in between
-                for i in range(0, n_train):
-                    self.partial_fit([X[object_idxs][i]], [Y[object_idxs][i]])
-                    self.partial_fit([X[random_idxs][i]], [Y[random_idxs][i]])
-                    n_samples_used += 2
+               # for i in range(0, n_train):
+               #     self.partial_fit([X[random_idxs][i]], [Y[random_idxs][i]])
+                  #  n_samples_used += 2
         return n_samples_used
 
     def our_second_al_strategy(self, X, Y, classes = np.array(range(51)), inital_dataset_size = 300, threshold=0.5):
@@ -134,6 +136,7 @@ class ClassifierWithALStrategy():
             else:
                 correct_cnt = 0
             if correct_cnt == n_consecutive_correct_next_class:
+                n_consecutive_correct_next_class -= 1
                 classes_done += 1
                 if classes_done < 51:
                     next_instance_idx = np.where(Y == Y[i]+1)
