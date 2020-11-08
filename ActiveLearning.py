@@ -84,49 +84,49 @@ class ActiveLearning():
                # for i in range(0, n_train):
                #     self.partial_fit([X[random_idxs][i]], [Y[random_idxs][i]])
                   #  n_samples_used += 2
+        print('Finished')
         return n_samples_used
 
-    def our_second_al_strategy(self, X, Y, classes = np.array(range(51)), inital_dataset_size = 300):
-        classes = np.array(range(51)) if classes is None else classes  # default classes are 0-50
+    
+    def second_al_strategy(self, X, Y, classes = np.array(range(51)), inital_dataset_size = 300):
+        
+        #classes = np.array(range(51)) if classes is None else classes  # default classes are 0-50
         shuffeled_X, shuffeled_Y = self.shuffling(X, Y)
         # fit to shuffled inital dataset
         self.partial_fit(shuffeled_X[:inital_dataset_size], shuffeled_Y[:inital_dataset_size], classes)
-        correct_cnt = 0
-        n_consecutive_correct_next_class = 10
-        i = 0
-        n_samples_used = 0
-        skip_to_next = 0
-        classes_done = 0
-        while i < len(Y):
-            pred = self.predict([X[i]])
-            if pred == Y[i]:
-                correct_cnt += 1
-            else:
-                correct_cnt = 0
-            if correct_cnt == n_consecutive_correct_next_class:
-                classes_done += 1
-                if classes_done < 51:
-                    next_instance_idx = np.where(Y == Y[i]+1)
-                    dummy = np.sort(next_instance_idx)
-                    x = dummy[0][0]
-                    correct_cnt = 0
-                    skip_to_next = 1
-            if skip_to_next == 1:
-                i = x
-                skip_to_next = 0
-            else:
-                i += 1
-            if classes_done == 51:
-                print("Finished!")
-                break
-            if i > len(Y) - 1:
-                print("Ran out of data, try smaller number of consecutive correctly predicted classes")
-                break
-            self.partial_fit([X[i]], [Y[i]], classes)
-            self.partial_fit([shuffeled_X[i]], [shuffeled_Y[i]], classes)
-            n_samples_used += 2
-        return n_samples_used
-    
+        
+        training_samples_used = 0
+        
+        for type_of_object in classes:
+            print(type_of_object)
+            
+            # get current class to train
+            idx = np.argwhere(Y == type_of_object).flatten()
+            current_objects = X[idx]
+            current_labels = Y[idx]
+            
+            # get counter example
+            mask = np.ones(Y.size, dtype=bool)
+            mask[idx] = False
+            other_labels = Y[mask]
+            other_objects = X[mask]
+            
+            consecute_guesses = 0
+            while consecute_guesses < 50:
+                i = np.random.choice(len(current_objects))
+                pred = self.predict([current_objects[i]])
+                if pred == type_of_object:
+                    consecute_guesses += 1
+                else:
+                    consecute_guesses = 0
+                    counter_i = np.random.choice(len(other_objects))
+                    self.partial_fit([current_objects[i]], [current_labels[i]], classes)
+                    self.partial_fit([other_objects[counter_i]], [other_labels[counter_i]], classes)
+                    training_samples_used += 2
+                    
+        return training_samples_used
+            
+            
 class MondrianForest(ActiveLearning, MondrianForestClassifier):
     pass
     
