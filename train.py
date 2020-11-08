@@ -44,21 +44,20 @@ def train_and_test(args):
             print('Quitting the code..')
             
         if args.strategy == 0:
-            samples_used.append(mf.fit_using_al_strategy_thres_intermediate_update(data[training_idxs], labels[training_idxs],np.array(range(51))))
+            samples_used.append(mf.fit_using_al_strategy_thres_intermediate_update(data[training_idxs], labels[training_idxs],np.array(range(51)), inital_dataset_size=3, threshold=args.threshold))
         elif args.strategy == 1:
             samples_used.append(mf.our_al_strategy(data[training_idxs], labels[training_idxs], np.array(range(51)), 1000, args.threshold))
         elif args.strategy == 2:
-            samples_used.append(mf.our_second_al_strategy(data[training_idxs], labels[training_idxs], np.array(range(51)), 300))
+            samples_used.append(mf.our_second_al_strategy(data[training_idxs], labels[training_idxs], np.array(range(51)), 1000))
         else:
             print('ERROR: pleaase specify a valid strategy (i.e. --strategy 0)')
             print('Quitting the code..')
                 
         scores.append(mf.score(np.array(data[validation_idxs, :]), np.array(labels[validation_idxs])))
-        break
         del mf
 
     print("\n--------")
-    print("Performed cross-validation using a threshold of {}".format(args.threshold))
+    print("Performed cross-validation")
     function_time = time.time() - start_time
     print("The cross validation took {} minutes and {} seconds".format(function_time // 60, function_time % 60))
     print("--------")
@@ -67,6 +66,8 @@ def train_and_test(args):
     print("--------")
     print("Accuracies: {:.2f} +- {:.2f}".format(np.mean(scores) * 100, np.std(scores) * 100))
     print(scores)
+    print("--------\n")
+    print("The cross validation took {} minutes and {} seconds".format(function_time // 60, function_time % 60))
     print("--------\n")
 
 

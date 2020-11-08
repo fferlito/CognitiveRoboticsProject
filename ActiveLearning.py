@@ -40,6 +40,7 @@ class ActiveLearning():
         # first shuffle the dataset and get the initial data
         X, Y = self.shuffling(X, Y)
         # Partial fit on the initial data
+
         self.partial_fit(X[:inital_dataset_size], Y[:inital_dataset_size], classes)
 
         amount_of_training_samples_selected = 0
@@ -51,6 +52,7 @@ class ActiveLearning():
                 self.partial_fit([data], [label])
                 amount_of_training_samples_selected += 1
 
+            
         return amount_of_training_samples_selected
 
     def random_sample_from_one_instance(self, Y, instance, n_train):
@@ -67,7 +69,7 @@ class ActiveLearning():
         self.partial_fit(shuffled_X[:inital_dataset_size], shuffled_Y[:inital_dataset_size], classes)
         i = 0
         for data, label in zip(X, Y):
-            i += 1
+            i += 1	
             # Calculate confidence in the prediction for the data sample
             if self.calculate_confidence(self.predict_proba([data])[0]) < threshold:
                 # train on exact instance that is was unsure about
@@ -90,7 +92,7 @@ class ActiveLearning():
         # fit to shuffled inital dataset
         self.partial_fit(shuffeled_X[:inital_dataset_size], shuffeled_Y[:inital_dataset_size], classes)
         correct_cnt = 0
-        n_consecutive_correct_next_class = 50
+        n_consecutive_correct_next_class = 10
         i = 0
         n_samples_used = 0
         skip_to_next = 0
