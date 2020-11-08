@@ -14,7 +14,7 @@ To run the code:
 1. first compile the c++ code in the CPP folder. Please refer to https://github.com/SeyedHamidreza/GOOD_descriptor
 2. download the dataset 
 3. Install the python modules, specified in the requirements.txt file. We suggest to install the packages one by one, using the versions indicated.
-4. Build the dataset (build_additional_dataset.py) changing the path variables EVAL_DATASET_PATH, PC_DATASET_PATH, OUTPUT_DATASET_PATH
+4. Build the dataset (build_additional_dataset.py and build_dataset.py) changing the path variables EVAL_DATASET_PATH, PC_DATASET_PATH, OUTPUT_DATASET_PATH
 5. Run either the train.py to generate the run the cross-validation and get the results. The scripts requires the following flags:
 You need to include the following flags: 
 ``` 
