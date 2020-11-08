@@ -71,12 +71,11 @@ class ActiveLearning():
         i = 0
         for data, label in zip(X, Y):
             i += 1
-            if i > len(Y) - 1:
-                print("WARNING: Ran out of data")
-                break
             # Calculate confidence in the prediction for the data sample
             if self.calculate_confidence(self.predict_proba([data])[0]) < threshold:
                 # train on exact instance that is was unsure about
+                if i >= len(Y):
+                    i = 1
                 self.partial_fit([data], [label])
                 self.partial_fit([shuffled_X[i]], [shuffled_Y[i]])
                 n_samples_used += 2
