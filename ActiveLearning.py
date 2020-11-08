@@ -1,4 +1,5 @@
 import numpy as np
+
 from skgarden import MondrianForestClassifier
 from sklearn.naive_bayes import GaussianNB
 from skmultiflow.lazy import KNNClassifier
@@ -69,21 +70,15 @@ class ActiveLearning():
         self.partial_fit(shuffled_X[:inital_dataset_size], shuffled_Y[:inital_dataset_size], classes)
         i = 0
         for data, label in zip(X, Y):
-            i += 1	
+            i += 1
             # Calculate confidence in the prediction for the data sample
             if self.calculate_confidence(self.predict_proba([data])[0]) < threshold:
                 # train on exact instance that is was unsure about
+                if i >= len(Y):
+                    i = 1
                 self.partial_fit([data], [label])
                 self.partial_fit([shuffled_X[i]], [shuffled_Y[i]])
                 n_samples_used += 2
-                # train again on 2 * n_train instances (half of the unsure class, half random)
-                #object_idxs = self.random_sample_from_one_instance(Y, label, n_train)
-               # random_idxs = np.random.choice(len(Y), size=n_train)
-               # print(object_idxs, random_idxs)
-                # fit again for objects of the unsure instance with always a random one in between
-               # for i in range(0, n_train):
-               #     self.partial_fit([X[random_idxs][i]], [Y[random_idxs][i]])
-                  #  n_samples_used += 2
         print('Finished')
         return n_samples_used
 
