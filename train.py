@@ -57,6 +57,9 @@ def train_and_test(args):
         print('Finished fold..')
                 
         scores.append(mf.score(np.array(data[validation_idxs, :]), np.array(labels[validation_idxs])))
+        stopper += 1
+        if stopper == 1:
+            break
         del mf
         gc.collect()
 
