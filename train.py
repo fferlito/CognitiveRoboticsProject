@@ -36,7 +36,7 @@ def train_and_test(args):
     stopper = 0
     for training_idxs, validation_idxs in cv_generator:
         if args.classifier == 0:
-            mf = MondrianForest(n_estimators=10, max_depth =1000)
+            mf = MondrianForest(n_estimators=22)
         elif args.classifier == 1:
             mf = GaussianNaiveBayes(var_smoothing = 0.001)
         elif args.classifier == 2:
@@ -48,18 +48,14 @@ def train_and_test(args):
         if args.strategy == 0:
             samples_used.append(mf.fit_using_al_strategy_thres_intermediate_update(data[training_idxs], labels[training_idxs],np.array(range(51)), inital_dataset_size=1000, threshold=args.threshold))
         elif args.strategy == 1:
-            samples_used.append(mf.our_al_strategy(data[training_idxs], labels[training_idxs], np.array(range(51)), 1000, args.threshold))
+            samples_used.append(mf.alternated_intermediate_update(data[training_idxs], labels[training_idxs], np.array(range(51)), 1000, args.threshold))
         elif args.strategy == 2:
-            samples_used.append(mf.second_al_strategy(data[training_idxs], labels[training_idxs], np.array(range(51)), 1000))
+            samples_used.append(mf.sequential_prediction_strategy(data[training_idxs], labels[training_idxs], np.array(range(51)), 1000))
         else:
             print('ERROR: pleaase specify a valid strategy (i.e. --strategy 0)')
             print('Quitting the code..')
-        print('Finished fold..')
                 
         scores.append(mf.score(np.array(data[validation_idxs, :]), np.array(labels[validation_idxs])))
-        stopper += 1
-        if stopper == 1:
-            break
         del mf
         gc.collect()
 

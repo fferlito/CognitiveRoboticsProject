@@ -61,7 +61,17 @@ class ActiveLearning():
         random_sample_of_instance = np.random.choice(instance_idxs[0], size=n_train)
         return random_sample_of_instance
 
-    def our_al_strategy(self, X, Y, classes=np.array(range(51)), inital_dataset_size=300, threshold = 0.5):
+    def alternated_intermediate_update(self, X, Y, classes=np.array(range(51)), inital_dataset_size=300, threshold = 0.5):
+        """
+        This method trains on the initial data and goes through the remaining data learning from the samples or not
+        according to the confidence threshold, using sample from the other classes during learning
+        :param X: Data samples
+        :param Y: Data labels
+        :param classes: all classes
+        :param inital_dataset_size: the size of the initial training set
+        :param threshold: the confidence threshold
+        :return:
+        """
         classes = np.array(range(51)) if classes is None else classes  # default classes are 0-50
         shuffled_X, shuffled_Y = self.shuffling(X, Y)
         n_train = 1 # change number of training instances here
@@ -79,22 +89,27 @@ class ActiveLearning():
                 self.partial_fit([data], [label])
                 self.partial_fit([shuffled_X[i]], [shuffled_Y[i]])
                 n_samples_used += 2
-        print('Finished')
         return n_samples_used
 
     
-    def second_al_strategy(self, X, Y, classes = np.array(range(51)), inital_dataset_size = 300):
+    def sequential_prediction_strategy(self, X, Y, classes = np.array(range(51)), inital_dataset_size = 300):
+        """
+        This method trains on the initial data and goes through the remaining data learning from the samples or not
+        according to the number of sequential items to classify correctly
+        :param X: Data samples
+        :param Y: Data labels
+        :param classes: all classes
+        :param inital_dataset_size: the size of the initial training set
+        :return:
+        """
         
-        #classes = np.array(range(51)) if classes is None else classes  # default classes are 0-50
         shuffeled_X, shuffeled_Y = self.shuffling(X, Y)
         # fit to shuffled inital dataset
         self.partial_fit(shuffeled_X[:inital_dataset_size], shuffeled_Y[:inital_dataset_size], classes)
         
         training_samples_used = 0
         
-        for type_of_object in classes:
-            print(type_of_object)
-            
+        for type_of_object in classes:            
             # get current class to train
             idx = np.argwhere(Y == type_of_object).flatten()
             current_objects = X[idx]
@@ -106,6 +121,7 @@ class ActiveLearning():
             other_labels = Y[mask]
             other_objects = X[mask]
             
+            # train using our strategy: train a class until N consecutive prediction on it
             consecute_guesses = 0
             while consecute_guesses < 50:
                 i = np.random.choice(len(current_objects))
